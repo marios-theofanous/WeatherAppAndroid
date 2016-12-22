@@ -10,9 +10,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.theofanous.marios.weatherapp.MainActivity">
 
-    <TextView
+    <fragment
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:id="@+id/response" />
+        android:name="com.theofanous.marios.weatherapp.weatherListFragment"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/fragment"
+        tools:layout="@layout/fragment_weather_list" />
+
 </RelativeLayout>

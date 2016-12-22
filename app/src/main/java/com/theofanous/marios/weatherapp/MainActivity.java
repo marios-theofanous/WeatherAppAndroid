@@ -6,6 +6,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -151,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return null;
                 }
                 URL url = new URL("http://api.openweathermap.org/data/2.5/forecast?lat="+String.valueOf(mLastLocation.getLatitude())+
-                        "&lon="+String.valueOf(mLastLocation.getLongitude())+"&appid="+BuildConfig.WEATHER_API_KEY);
+                        "&lon="+String.valueOf(mLastLocation.getLongitude())+"&appid="+BuildConfig.WEATHER_API_KEY+"&units=metric");
 
                 HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
@@ -184,8 +186,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     String weatherMain = weather.getJSONArray("weather")
                             .getJSONObject(0)
                             .getString("main");
+                    long dt = weather.getLong("dt");
 
-                    list.add(new DayData(mainTemp, minTemp, maxTemp, humidity, weatherIconId, weatherMain));
+                    list.add(new DayData(mainTemp, minTemp, maxTemp, humidity, weatherIconId, weatherMain, dt));
                 }
                 WeatherData weatherData = new WeatherData(cityName,cityCountry, list);
                 return weatherData;
@@ -202,7 +205,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 Toast.makeText(getApplicationContext(), R.string.retrieval_error, Toast.LENGTH_LONG).show();
             } else {
                 //TODO use custom list adapter and give it the daydata list inside weather data
-                TextView response = (TextView) findViewById(R.id.response);
+                weatherListFragment fragment = (weatherListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
+                if(fragment!=null){
+                    fragment.onDataChanged(s);
+                }
 
             }
         }

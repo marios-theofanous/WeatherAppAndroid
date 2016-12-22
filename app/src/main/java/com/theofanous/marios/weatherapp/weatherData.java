@@ -3,37 +3,32 @@ package com.theofanous.marios.weatherapp;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Marios on 21/12/2016.
- */
-
-public class weatherData {
+public class WeatherData {
     String cityName, country;
-    double lon, lat;
-    List<dayData> list = new ArrayList<>();
+    List<DayData> list = new ArrayList<>();
 
 
-    public weatherData(String cityName, String country, double lon, double lat, List<dayData> list) {
+    public WeatherData(String cityName, String country, List<DayData> list) {
         this.cityName = cityName;
         this.country = country;
-        this.lon = lon;
-        this.lat = lat;
         this.list = list;
     }
 }
 
-class dayData {
+class DayData {
     double mainTemp, minTemp, maxTemp;
-    int humidity, weatherIconId;
-    String weatherMain;
+    long dt;
+    int humidity;
+    String weatherMain, weatherIconId;
 
-    public dayData(double mainTemp, double minTemp, double maxTemp,
-                   int humidity, int weatherIconId, String weatherMain) {
+    public DayData(double mainTemp, double minTemp, double maxTemp,
+                   int humidity, String weatherIconId, String weatherMain, long dt) {
         this.mainTemp = mainTemp;
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
         this.humidity = humidity;
         this.weatherIconId = weatherIconId;
         this.weatherMain = weatherMain;
+        this.dt = dt;
     }
 }

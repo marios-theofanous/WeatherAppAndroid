@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import java.util.List;
+
 public class weatherListFragment extends Fragment {
 
     ListView weatherListview;
@@ -25,8 +27,10 @@ public class weatherListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_weather_list, container, false);
         weatherListview = (ListView) view.findViewById(R.id.weather_listview);
-//        weatherListview.setAdapter();
-
         return view;
+    }
+
+    public void onDataChanged (WeatherData weatherData){
+        weatherListview.setAdapter(new WeatherAdapter(getActivity(), R.layout.weatherlist_item_row, weatherData.list));
     }
 }
