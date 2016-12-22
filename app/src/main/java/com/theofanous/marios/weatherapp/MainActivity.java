@@ -5,7 +5,6 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringDef;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,11 +19,15 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.jar.Manifest;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -137,15 +140,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    class retrieveWeatherData extends AsyncTask<Void, Void, String> {
+    class retrieveWeatherData extends AsyncTask<Void, Void, WeatherData> {
 
 
         @Override
-        protected String doInBackground(Void... params) {
+        protected WeatherData doInBackground(Void... params) {
             try{
                 if(mLastLocation==null){
                     Log.i(LOG_TAG, "mLastLocation is empty in retrieve weather data");
-                    return "";
+                    return null;
                 }
                 URL url = new URL("http://api.openweathermap.org/data/2.5/forecast?lat="+String.valueOf(mLastLocation.getLatitude())+
                         "&lon="+String.valueOf(mLastLocation.getLongitude())+"&appid="+BuildConfig.WEATHER_API_KEY);
@@ -160,8 +163,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 //Closing streams
                 bufferedReader.close();
                 urlConnection.disconnect();
-                //Returning the JSON file in string format
-                return stringBuilder.toString();
+                //Parsing the JSON file
+                JSONObject jsonObject = new JSONObject(stringBuilder.toString());
+                JSONObject city = jsonObject.getJSONObject("city");
+                String cityName = city.getString("name");
+                String cityCountry = city.getString("country");
+                JSONArray array = jsonObject.getJSONArray("list");
+                List<DayData> list = new ArrayList<>();
+                for(int i=0; i<array.length(); i+=8){
+                    JSONObject weather = array.getJSONObject(i);
+                    double mainTemp = weather.getJSONObject("main").getDouble("temp");
+                    double minTemp = weather.getJSONObject("main").getDouble("temp_min");
+                    double maxTemp = weather.getJSONObject("main").getDouble("temp_max");
+                    int humidity = weather.getJSONObject("main").getInt("humidity");
+
+                    String weatherIconId = weather.getJSONArray("weather")
+                            .getJSONObject(0)
+                            .getString("icon");
+
+                    String weatherMain = weather.getJSONArray("weather")
+                            .getJSONObject(0)
+                            .getString("main");
+
+                    list.add(new DayData(mainTemp, minTemp, maxTemp, humidity, weatherIconId, weatherMain));
+                }
+                WeatherData weatherData = new WeatherData(cityName,cityCountry, list);
+                return weatherData;
+
             }catch (Exception e){
                 Log.e("ERROR RETRIEVING DATA", e.getMessage());
                 return null;
@@ -169,13 +197,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(WeatherData s) {
             if(s==null){
                 Toast.makeText(getApplicationContext(), R.string.retrieval_error, Toast.LENGTH_LONG).show();
             } else {
-                //TODO replace with code to parse the JSON file and setup the listview
+                //TODO use custom list adapter and give it the daydata list inside weather data
                 TextView response = (TextView) findViewById(R.id.response);
-                response.setText(s);
+
             }
         }
     }
