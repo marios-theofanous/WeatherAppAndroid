@@ -9,11 +9,11 @@ import android.widget.ListView;
 
 import java.util.List;
 
-public class weatherListFragment extends Fragment {
+public class WeatherListFragment extends Fragment {
 
     ListView weatherListview;
 
-    public weatherListFragment() {
+    public WeatherListFragment() {
         // Required empty public constructor
     }
 

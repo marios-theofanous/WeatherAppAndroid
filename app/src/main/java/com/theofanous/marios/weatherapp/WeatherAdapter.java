@@ -3,8 +3,6 @@ package com.theofanous.marios.weatherapp;
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.SharedPreferencesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +38,10 @@ public class WeatherAdapter extends ArrayAdapter<DayData>{
             holder=new Holder();
             holder.icon = (ImageView)row.findViewById(R.id.weatherIcon);
             holder.day = (TextView)row.findViewById(R.id.dayTextView);
-            holder.temp = (TextView)row.findViewById(R.id.tempTextView);
+            holder.dayIcon = (ImageView) row.findViewById(R.id.dayIcon);
+            holder.nightIcon = (ImageView) row.findViewById(R.id.nightIcon);
+            holder.dayTemp = (TextView)row.findViewById(R.id.dayTempTextView);
+            holder.nightTemp = (TextView)row.findViewById(R.id.nightTempTextView);
             row.setTag(holder);
         } else {
             holder = (Holder)row.getTag();
@@ -48,8 +49,11 @@ public class WeatherAdapter extends ArrayAdapter<DayData>{
 
         //TODO make these take all parameters from daydata obj
         DayData data = dayData.get(position);
+        holder.dayIcon.setImageResource(R.drawable.ic_sunny);
+        holder.nightIcon.setImageResource(R.drawable.ic_moon);
         holder.icon.setImageResource(R.drawable.ic_sunny);
-        holder.temp.setText(String.valueOf(data.mainTemp)+"°");
+        holder.dayTemp.setText(String.valueOf(data.dayTemp)+"°");
+        holder.nightTemp.setText(String.valueOf(data.nightTemp)+"°");
         holder.day.setText(DateHelper.getNameOfDayFromUnix(data.dt));
 
         return row;
@@ -57,7 +61,10 @@ public class WeatherAdapter extends ArrayAdapter<DayData>{
 
     static class Holder {
         ImageView icon;
+        ImageView dayIcon;
+        ImageView nightIcon;
         TextView day;
-        TextView temp;
+        TextView dayTemp;
+        TextView nightTemp;
     }
 }

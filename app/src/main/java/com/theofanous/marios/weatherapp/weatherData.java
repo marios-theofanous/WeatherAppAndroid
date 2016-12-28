@@ -16,14 +16,15 @@ public class WeatherData {
 }
 
 class DayData {
-    double mainTemp, minTemp, maxTemp;
+    double dayTemp, nightTemp, minTemp, maxTemp;
     long dt;
     int humidity;
     String weatherMain, weatherIconId;
 
-    public DayData(double mainTemp, double minTemp, double maxTemp,
+    public DayData(double dayTemp, double nightTemp, double minTemp, double maxTemp,
                    int humidity, String weatherIconId, String weatherMain, long dt) {
-        this.mainTemp = mainTemp;
+        this.dayTemp = dayTemp;
+        this.nightTemp = nightTemp;
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
         this.humidity = humidity;

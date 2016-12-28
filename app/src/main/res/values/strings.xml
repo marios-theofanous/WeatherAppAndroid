@@ -5,4 +5,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="retrieval_error">There was an error retrieving weather data</string>
     <string name="yesterday">Yesterday</string>
+    <string name="weather_icon_description">Weather Icon</string>
 </resources>

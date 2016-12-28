@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.theofanous.marios.weatherapp.weatherListFragment">
+    tools:context="com.theofanous.marios.weatherapp.WeatherListFragment">
 
     <ListView
         android:id="@+id/weather_listview"

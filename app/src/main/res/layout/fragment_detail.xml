@@ -1,0 +1,104 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.theofanous.marios.weatherapp.DetailFragment">
+
+    <ImageView
+        android:id="@+id/detail_weather_icon"
+        android:layout_width="match_parent"
+        android:layout_height="@android:dimen/thumbnail_width"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:contentDescription="@string/weather_icon_description"
+        tools:src="@drawable/ic_sunny"/>
+
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/detail_weather_icon"
+        android:id="@+id/location_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Bradford, GB"/>
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/location_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="18/12/2016"/>
+
+   <LinearLayout
+       android:layout_below="@+id/date"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:orientation="horizontal"
+       android:baselineAligned="false">
+
+       <!--Left column-->
+       <LinearLayout
+           android:orientation="vertical"
+           android:layout_width="match_parent"
+           android:layout_weight="1"
+           android:paddingTop="@dimen/cast_libraries_material_featurehighlight_outer_padding"
+           android:layout_height="wrap_content">
+
+           <TextView
+               android:id="@+id/maxTemp"
+               android:layout_gravity="center"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               tools:text="Max: 18C"/>
+
+           <TextView
+               android:id="@+id/minTemp"
+               android:layout_gravity="center"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               tools:text="Min: 13C"/>
+
+       </LinearLayout>
+
+       <!--Right column-->
+       <LinearLayout
+           android:orientation="vertical"
+           android:layout_width="match_parent"
+           android:layout_weight="1"
+           android:paddingTop="@dimen/cast_libraries_material_featurehighlight_outer_padding"
+           android:layout_height="wrap_content">
+
+           <TextView
+               android:id="@+id/pressure"
+               android:layout_gravity="center"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               tools:text="1.1 hPa"/>
+
+           <TextView
+               android:id="@+id/humidity"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_gravity="center"
+               tools:text="Hum: 78%"/>
+
+           <TextView
+               android:id="@+id/wind_speed"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_gravity="center"
+               tools:text="Wind: 15m/s"/>
+
+
+       </LinearLayout>
+
+
+
+   </LinearLayout>
+
+
+
+
+
+</RelativeLayout>
