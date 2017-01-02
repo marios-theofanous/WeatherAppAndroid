@@ -51,11 +51,10 @@ public class WeatherAdapter extends ArrayAdapter<DayData>{
         DayData data = dayData.get(position);
         holder.dayIcon.setImageResource(R.drawable.ic_sunny);
         holder.nightIcon.setImageResource(R.drawable.ic_moon);
-        holder.icon.setImageResource(R.drawable.ic_sunny);
-        holder.dayTemp.setText(String.valueOf(data.dayTemp)+"°");
-        holder.nightTemp.setText(String.valueOf(data.nightTemp)+"°");
-        holder.day.setText(DateHelper.getNameOfDayFromUnix(data.dt));
-
+        holder.icon.setImageResource(IconFetcher.returnIconString(data.weatherIconId));
+        holder.dayTemp.setText(HelperMethods.getTemp(getContext(), data.dayTemp));
+        holder.nightTemp.setText(HelperMethods.getTemp(getContext(), data.nightTemp));
+        holder.day.setText(HelperMethods.getNameOfDayFromUnix(data.dt));
         return row;
     }
 

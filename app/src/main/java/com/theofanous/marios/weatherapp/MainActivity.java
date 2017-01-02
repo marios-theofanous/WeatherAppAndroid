@@ -1,11 +1,15 @@
 package com.theofanous.marios.weatherapp;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -29,13 +33,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, WeatherListFragment.DayListListener {
+
+
+
+    public static final String ICON_KEY = "ICON_KEY";
+    public static final String LOCATION_KEY = "LOCATION_KEY";
+    public static final String DATE_KEY = "DATE_KEY";
+    public static final String MAX_TEMP_KEY = "MAX_TEMP_KEY";
+    public static final String MIN_TEMP_KEY = "MIN_TEMP_KEY";
+    public static final String PRESSURE_KEY = "PRESSURE_KEY";
+    public static final String HUMIDITY_KEY = "HUMIDITY_KEY";
+    public static final String WIND_SPEED_KEY = "WIND_SPEED_KEY";
+    private static final String LIST_FRAGMENT_TAG = "LIST_FRAGMENT_TAG";
 
     private final String LOG_TAG = "MainActivityLog";
     private static final int MY_PERMISSION_REQUEST_COARSE_LOCATION = 5;
     double lon, lat;
     GoogleApiClient mGoogleApiClient;
-
+    WeatherData weatherData;
     Location mLastLocation;
     LocationRequest mLocationRequest;
 
@@ -52,6 +68,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Fragment f = getSupportFragmentManager()
+                .findFragmentByTag(LIST_FRAGMENT_TAG);
+
+        if(f!=null && weatherData!=null){
+            ((WeatherListFragment)f).onDataChanged(weatherData);
+        }
     }
 
     @Override
@@ -72,7 +99,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .setInterval(1000000)
                 .setFastestInterval(1000000);
 
-
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.activity_main, new WeatherListFragment(), LIST_FRAGMENT_TAG)
+                .commit();
     }
 
     @Override
@@ -139,6 +169,38 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
+    @Override
+    public void onDaySelected(int position) {
+        Toast.makeText(this, String.valueOf(position), Toast.LENGTH_SHORT).show();
+//        Intent intent = new Intent(this, DetailsActivity.class);
+//        Bundle bundle = new Bundle();
+//        bundle.putString(LOCATION_KEY, weatherData.cityName+", "+weatherData.country);
+//        DayData dayData = weatherData.list.get(position);
+//        bundle.putLong(DATE_KEY, dayData.dt);
+//        bundle.putDouble(MAX_TEMP_KEY, dayData.maxTemp);
+//        bundle.putDouble(MIN_TEMP_KEY, dayData.minTemp);
+//        bundle.putDouble(PRESSURE_KEY, dayData.pressure);
+//        bundle.putInt(HUMIDITY_KEY, dayData.humidity);
+//        bundle.putDouble(WIND_SPEED_KEY, dayData.windSpeed);
+//        intent.putExtras(bundle);
+//        startActivity(intent);
+        DetailFragment detailFragment = new DetailFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt("POSITION", position);
+        detailFragment.setArguments(bundle);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.activity_main, detailFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+
+    }
+
+    void TaskHelper(WeatherListFragment f){
+        if(weatherData!=null)
+            f.onDataChanged(weatherData);
+    }
+
     class retrieveWeatherData extends AsyncTask<Void, Void, WeatherData> {
 
 
@@ -186,10 +248,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             .getJSONObject(0)
                             .getString("main");
                     long dt = weather.getLong("dt");
+                    double pressure = weather.getDouble("pressure");
+                    double speed = weather.getDouble("speed");
 
-                    list.add(new DayData(dayTemp, nightTemp, minTemp, maxTemp, humidity, weatherIconId, weatherMain, dt));
+                    list.add(new DayData(dayTemp, nightTemp, minTemp, maxTemp, humidity, weatherIconId, weatherMain, dt, pressure, speed));
                 }
-                WeatherData weatherData = new WeatherData(cityName,cityCountry, list);
+                weatherData = new WeatherData(cityName,cityCountry, list);
                 return weatherData;
 
             }catch (Exception e){
@@ -203,8 +267,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             if(s==null){
                 Toast.makeText(getApplicationContext(), R.string.retrieval_error, Toast.LENGTH_LONG).show();
             } else {
-                //TODO use custom list adapter and give it the daydata list inside weather data
-                WeatherListFragment fragment = (WeatherListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
+                //Sets the action bar to show the city and country detected
+
+                getSupportActionBar().setTitle(weatherData.cityName+", "+weatherData.country);
+                WeatherListFragment fragment = (WeatherListFragment) getSupportFragmentManager().findFragmentByTag(LIST_FRAGMENT_TAG);
                 if(fragment!=null){
                     fragment.onDataChanged(s);
                 }
