@@ -1,7 +1,10 @@
 package com.theofanous.marios.weatherapp;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,6 +16,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -30,12 +34,13 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, WeatherListFragment.DayListListener {
 
-
+    WeatherContract.WeatherDbHelper mDbHelper;
 
     public static final String ICON_KEY = "ICON_KEY";
     public static final String LOCATION_KEY = "LOCATION_KEY";
@@ -85,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mDbHelper = new WeatherContract.WeatherDbHelper(getBaseContext());
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -99,10 +105,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .setInterval(1000000)
                 .setFastestInterval(1000000);
 
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.activity_main, new WeatherListFragment(), LIST_FRAGMENT_TAG)
-                .commit();
+        if(getSupportFragmentManager().findFragmentByTag(LIST_FRAGMENT_TAG)==null){
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.activity_main, new WeatherListFragment(), LIST_FRAGMENT_TAG)
+                    .commit();
+        }
     }
 
     @Override
@@ -184,15 +192,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 //        bundle.putDouble(WIND_SPEED_KEY, dayData.windSpeed);
 //        intent.putExtras(bundle);
 //        startActivity(intent);
-        DetailFragment detailFragment = new DetailFragment();
         Bundle bundle = new Bundle();
         bundle.putInt("POSITION", position);
-        detailFragment.setArguments(bundle);
+        DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager().findFragmentById(R.id.fragment3);
+        if(detailFragment!=null && detailFragment instanceof DetailFragment){
+            detailFragment.go(position);
+        }else {
+            detailFragment = new DetailFragment();
+            detailFragment.setArguments(bundle);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.activity_main, detailFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.activity_main, detailFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+
 
     }
 
@@ -206,6 +220,106 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         @Override
         protected WeatherData doInBackground(Void... params) {
+            SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+            String[] values = {
+                    WeatherContract.DayEntry._ID,
+                    WeatherContract.DayEntry.COLUMN_NAME_COUNTRY,
+                    WeatherContract.DayEntry.COLUMN_NAME_CITY,
+                    WeatherContract.DayEntry.COLUMN_NAME_ICON,
+                    WeatherContract.DayEntry.COLUMN_NAME_DT,
+                    WeatherContract.DayEntry.COLUMN_NAME_MAX_TEMP,
+                    WeatherContract.DayEntry.COLUMN_NAME_MIN_TEMP,
+                    WeatherContract.DayEntry.COLUMN_NAME_DAY_TEMP,
+                    WeatherContract.DayEntry.COLUMN_NAME_NIGHT_TEMP,
+                    WeatherContract.DayEntry.COLUMN_NAME_PRESSURE,
+                    WeatherContract.DayEntry.COLUMN_NAME_HUMIDITY,
+                    WeatherContract.DayEntry.COLUMN_NAME_WIND_SPEED,
+            };
+
+            String sortOrder =
+                    WeatherContract.DayEntry.COLUMN_NAME_DT + " ASC";
+
+            Cursor cursor = db.query(
+                    WeatherContract.DayEntry.TABLE_NAME,
+                    values,
+                    null,
+                    null,
+                    null,
+                    null,
+                    sortOrder
+            );
+
+            WeatherData data;
+            List<DayData> list  = new ArrayList<DayData>();
+            String country = "", city = "";
+            while (cursor.moveToNext()){
+                long dt = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_DT));
+                country = cursor.getString(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_COUNTRY));
+                city = cursor.getString(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_CITY));
+                String icon = cursor.getString(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_ICON));
+                int maxTemp = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_MAX_TEMP));
+                int minTemp = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_MIN_TEMP));
+                int dayTemp = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_DAY_TEMP));
+                int nightTemp = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_NIGHT_TEMP));
+                double pressure = cursor.getDouble(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_PRESSURE));
+                int humidity = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_HUMIDITY));
+                double windSpeed = cursor.getDouble(
+                        cursor.getColumnIndexOrThrow(WeatherContract.DayEntry.COLUMN_NAME_WIND_SPEED));
+
+                list.add(new DayData(dayTemp, nightTemp, minTemp, maxTemp, humidity, icon, dt, pressure, windSpeed));
+            }
+            data = new WeatherData(city, country, list);
+            cursor.close();
+
+            if(data.list.size()==0 || HelperMethods.olderThanADay(data.list.get(0).dt)){
+                //TODO CALL API TO GET DATA
+                weatherData = callApi();
+                if(weatherData!=null){
+                    writeToDB(weatherData);
+                    return weatherData;
+                }else
+                    Log.e(LOG_TAG, "weather data is null after call to api");
+            }
+            weatherData = data;
+            return weatherData;
+        }
+
+
+        void writeToDB(WeatherData weatherData){
+            List<DayData> dayDatas = weatherData.list;
+            SQLiteDatabase db = mDbHelper.getWritableDatabase();
+            db.execSQL(WeatherContract.SQL_DELETE_ENTRIES);
+            db.execSQL(WeatherContract.SQL_CREATE_ENTRIES);
+            for(int i=0; i<dayDatas.size();i++){
+                DayData day = dayDatas.get(i);
+                ContentValues values = new ContentValues();
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_CITY, weatherData.cityName);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_COUNTRY, weatherData.country);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_DT, day.dt);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_ICON, day.weatherIconId);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_MAX_TEMP, day.maxTemp);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_MIN_TEMP, day.minTemp);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_DAY_TEMP, day.dayTemp);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_NIGHT_TEMP, day.nightTemp);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_PRESSURE, day.pressure);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_HUMIDITY, day.humidity);
+                values.put(WeatherContract.DayEntry.COLUMN_NAME_WIND_SPEED, day.windSpeed);
+                db.insert(WeatherContract.DayEntry.TABLE_NAME, null, values);
+            }
+        }
+
+        WeatherData callApi(){
             try{
                 if(mLastLocation==null){
                     Log.i(LOG_TAG, "mLastLocation is empty in retrieve weather data");
@@ -251,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     double pressure = weather.getDouble("pressure");
                     double speed = weather.getDouble("speed");
 
-                    list.add(new DayData(dayTemp, nightTemp, minTemp, maxTemp, humidity, weatherIconId, weatherMain, dt, pressure, speed));
+                    list.add(new DayData(dayTemp, nightTemp, minTemp, maxTemp, humidity, weatherIconId, dt, pressure, speed));
                 }
                 weatherData = new WeatherData(cityName,cityCountry, list);
                 return weatherData;

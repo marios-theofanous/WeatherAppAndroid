@@ -19,17 +19,16 @@ class DayData {
     double dayTemp, nightTemp, minTemp, maxTemp, pressure, windSpeed;
     long dt;
     int humidity;
-    String weatherMain, weatherIconId;
+    String weatherIconId;
 
     public DayData(double dayTemp, double nightTemp, double minTemp, double maxTemp,
-                   int humidity, String weatherIconId, String weatherMain, long dt, double pressure, double windSpeed) {
+                   int humidity, String weatherIconId, long dt, double pressure, double windSpeed) {
         this.dayTemp = dayTemp;
         this.nightTemp = nightTemp;
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
         this.humidity = humidity;
         this.weatherIconId = weatherIconId;
-        this.weatherMain = weatherMain;
         this.dt = dt;
         this.pressure = pressure;
         this.windSpeed = windSpeed;

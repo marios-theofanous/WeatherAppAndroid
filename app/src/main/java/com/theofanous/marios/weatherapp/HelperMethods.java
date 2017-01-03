@@ -13,6 +13,17 @@ import java.util.Locale;
 
 public class HelperMethods {
     public static final String PREFERENCES_TEMP_KEY = "PREFERENCES_TEMP_KEY";
+
+    static boolean olderThanADay(long time){
+        Calendar weatherTime = Calendar.getInstance();
+        weatherTime.setTimeInMillis(time*1000);
+        Calendar now = Calendar.getInstance();
+
+        if(now.get(Calendar.DATE)-weatherTime.get(Calendar.DATE)>0)
+            return true;
+        return false;
+    }
+
     static String getNameOfDayFromUnix(long unixTime){
 
         Calendar weatherTime = Calendar.getInstance();

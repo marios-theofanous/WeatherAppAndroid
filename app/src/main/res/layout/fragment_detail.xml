@@ -12,7 +12,7 @@
         android:layout_alignParentTop="true"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:contentDescription="@string/weather_icon_description"
-        tools:src="@drawable/ic_sunny"/>
+        android:src="@drawable/ic_sunny"/>
 
     <TextView
         android:layout_centerHorizontal="true"
@@ -20,7 +20,7 @@
         android:id="@+id/detail_location_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="Bradford, GB"/>
+        android:text="Bradford, GB"/>
 
     <TextView
         android:id="@+id/detail_date"
@@ -28,7 +28,7 @@
         android:layout_below="@+id/detail_location_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="18/12/2016"/>
+        android:text="18/12/2016"/>
 
    <LinearLayout
        android:layout_below="@+id/detail_date"
@@ -50,28 +50,28 @@
                android:layout_gravity="center"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               tools:text="Day: 18C"/>
+               android:text="Day: 18C"/>
 
            <TextView
                android:id="@+id/detail_nightTemp"
                android:layout_gravity="center"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               tools:text="Night: 10C"/>
+               android:text="Night: 10C"/>
 
            <TextView
                android:id="@+id/maxTemp"
                android:layout_gravity="center"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               tools:text="Max: 18C"/>
+               android:text="Max: 18C"/>
 
            <TextView
                android:id="@+id/detail_minTemp"
                android:layout_gravity="center"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               tools:text="Min: 13C"/>
+               android:text="Min: 13C"/>
 
        </LinearLayout>
 
@@ -88,21 +88,21 @@
                android:layout_gravity="center"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               tools:text="1.1 hPa"/>
+               android:text="1.1 hPa"/>
 
            <TextView
                android:id="@+id/detail_humidity"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:layout_gravity="center"
-               tools:text="Hum: 78%" />
+               android:text="Hum: 78%" />
 
            <TextView
                android:id="@+id/detail_wind_speed"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:layout_gravity="center"
-               tools:text="Wind: 15m/s"/>
+               android:text="Wind: 15m/s"/>
 
 
        </LinearLayout>
