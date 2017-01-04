@@ -47,7 +47,7 @@ public class WeatherAdapter extends ArrayAdapter<DayData>{
             holder = (Holder)row.getTag();
         }
 
-        //TODO make these take all parameters from daydata obj
+
         DayData data = dayData.get(position);
         holder.dayIcon.setImageResource(R.drawable.ic_sunny);
         holder.nightIcon.setImageResource(R.drawable.ic_moon);

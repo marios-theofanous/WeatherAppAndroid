@@ -19,7 +19,7 @@ public class HelperMethods {
         weatherTime.setTimeInMillis(time*1000);
         Calendar now = Calendar.getInstance();
 
-        if(now.get(Calendar.DATE)-weatherTime.get(Calendar.DATE)>0)
+        if(now.get(Calendar.DATE)-weatherTime.get(Calendar.DATE)>=1)
             return true;
         return false;
     }

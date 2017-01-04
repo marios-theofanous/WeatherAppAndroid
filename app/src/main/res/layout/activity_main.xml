@@ -10,6 +10,11 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.theofanous.marios.weatherapp.MainActivity">
 
-
+    <fragment
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:name="com.theofanous.marios.weatherapp.WeatherListFragment"
+        android:id="@+id/fragment4"
+        tools:layout="@layout/fragment_weather_list" />
 
 </FrameLayout>
