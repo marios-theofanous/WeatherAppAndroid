@@ -3,6 +3,7 @@ package com.theofanous.marios.weatherapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -13,6 +14,7 @@ import java.util.Locale;
 
 public class HelperMethods {
     public static final String PREFERENCES_TEMP_KEY = "PREFERENCES_TEMP_KEY";
+
 
     static boolean olderThanADay(long time){
         Calendar weatherTime = Calendar.getInstance();
@@ -41,11 +43,10 @@ public class HelperMethods {
     }
 
     static String getTemp(Context context, double celsiusTemp){
-        SharedPreferences sharedPreferences = context.getSharedPreferences(
-                context.getString(R.string.preference_file_key), Context.MODE_PRIVATE
-        );
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String unitPref = sharedPreferences.getString(context.getString(R.string.pref_temp_key),"");
 
-        if(sharedPreferences.getInt(context.getString(R.string.preference_temp_key),0)==0){
+        if(unitPref.equalsIgnoreCase(context.getString(R.string.pref_units_metric))){
             return String.valueOf((int)celsiusTemp)+"°C";
         } else{
             return celciusToFahrenheit(celsiusTemp);
