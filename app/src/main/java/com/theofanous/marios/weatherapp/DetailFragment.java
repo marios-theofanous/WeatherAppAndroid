@@ -26,7 +26,7 @@ public class DetailFragment extends Fragment {
     }
 
     public static interface DetailLoadedListener {
-        public abstract void onComplete();
+        public abstract void onComplete(long dt);
     }
 
     @Override
@@ -57,34 +57,6 @@ public class DetailFragment extends Fragment {
         pressure = (TextView) view.findViewById(R.id.detail_pressure);
         humidity = (TextView) view.findViewById(R.id.detail_humidity);
         windSpeed = (TextView) view.findViewById(R.id.detail_wind_speed);
-
-
-//        try {
-//            Bundle bundle = getArguments();
-//            position = bundle.getInt("POSITION");
-//
-//            weatherData = ((MainActivity)getActivity()).weatherData;
-//            dayData = weatherData.list.get(position);
-//
-//            //Set values
-//            icon.setImageResource(IconFetcher.returnIconString(dayData.weatherIconId));
-//            location.setText(weatherData.cityName+", "+weatherData.country);
-//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-//            date.setText(simpleDateFormat.format(dayData.dt*1000));
-//            dayTemp.setText(getString(R.string.dayTemp)+" "+HelperMethods.getTemp(getContext(), dayData.dayTemp));
-//            nightTemp.setText(getString(R.string.nightTemp)+" "+HelperMethods.getTemp(getContext(), dayData.dayTemp));
-//            maxTemp.setText(getString(R.string.max_temp)+" "+HelperMethods.getTemp(getContext(), dayData.maxTemp));
-//            minTemp.setText(getString(R.string.min_temp)+" "+HelperMethods.getTemp(getContext(), dayData.minTemp));
-//            pressure.setText(getString(R.string.pressure)+" "+String.valueOf(dayData.pressure)+" hPa");
-//            humidity.setText(getString(R.string.humidity)+" "+String.valueOf(dayData.humidity)+"%");
-//            windSpeed.setText(getString(R.string.wind_speed)+" "+String.valueOf(dayData.windSpeed)+" m/s");
-//        }catch (Exception e){
-//
-//        }finally {
-//            return view;
-//        }
-
-//        location.setText(String.valueOf(position));
         return view;
 
     }
@@ -92,7 +64,7 @@ public class DetailFragment extends Fragment {
     public void go(WeatherData data, int position) {
         weatherData = data;
         dayData = weatherData.list.get(position);
-
+        mListener.onComplete(dayData.dt);
         try {
             //Set values
             icon.setImageResource(IconFetcher.returnIconString(dayData.weatherIconId));

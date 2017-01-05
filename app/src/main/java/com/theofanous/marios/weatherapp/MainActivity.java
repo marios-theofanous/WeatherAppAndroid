@@ -105,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if(id==R.id.action_settings){
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        } else if(id==R.id.action_about){
+            startActivity(new Intent(this, About.class));
+            return true;
         }
         return false;
     }
@@ -233,14 +236,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     @Override
-    public void onComplete() {
-        if(weatherData!=null)
-        {
-            DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager().findFragmentById(R.id.detail_fragment_land);
-            if (detailFragment!=null)
-                detailFragment.go(weatherData, 0);
-        }
-
+    public void onComplete(long dt) {
+        //Required by detail fragment but not needed here
     }
 
     class retrieveWeatherData extends AsyncTask<Void, Void, WeatherData> {

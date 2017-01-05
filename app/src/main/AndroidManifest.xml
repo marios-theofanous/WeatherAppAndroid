@@ -37,6 +37,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.theofanous.marios.weatherapp.MainActivity" />
         </activity>
+        <activity
+            android:name=".About"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.theofanous.marios.weatherapp.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
