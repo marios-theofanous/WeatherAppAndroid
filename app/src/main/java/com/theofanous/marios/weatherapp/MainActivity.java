@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,15 +13,12 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -40,22 +36,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, WeatherListFragment.DayListListener, DetailFragment.DetailLoadedListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, WeatherListFragment.DayListListener,
+        DetailFragment.DetailLoadedListener, WeatherListFragment.OnRefreshListener {
 
     WeatherContract.WeatherDbHelper mDbHelper;
-
-    public static final String ICON_KEY = "ICON_KEY";
-    public static final String LOCATION_KEY = "LOCATION_KEY";
-    public static final String DATE_KEY = "DATE_KEY";
-    public static final String MAX_TEMP_KEY = "MAX_TEMP_KEY";
-    public static final String MIN_TEMP_KEY = "MIN_TEMP_KEY";
-    public static final String PRESSURE_KEY = "PRESSURE_KEY";
-    public static final String HUMIDITY_KEY = "HUMIDITY_KEY";
-    public static final String WIND_SPEED_KEY = "WIND_SPEED_KEY";
     private static final String LIST_FRAGMENT_TAG = "LIST_FRAGMENT_TAG";
 
     private final String LOG_TAG = "MainActivityLog";
@@ -106,24 +94,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
         } else if(id==R.id.action_about){
-            startActivity(new Intent(this, About.class));
+            startActivity(new Intent(this, AboutActivity.class));
             return true;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
+        //Set the toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         myToolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(myToolbar);
 
-        //Set the default preference
+        //Set the default preference in case it is the first time the app opens
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        mDbHelper = new WeatherContract.WeatherDbHelper(getBaseContext());
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -137,14 +126,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(1000000)
                 .setFastestInterval(1000000);
-
-        //TODO REMOVE THIS CODE
-//        if(getSupportFragmentManager().findFragmentByTag(LIST_FRAGMENT_TAG)==null){
-//            getSupportFragmentManager()
-//                    .beginTransaction()
-//                    .add(R.id.activity_main, new WeatherListFragment(), LIST_FRAGMENT_TAG)
-//                    .commit();
-//        }
     }
 
     @Override
@@ -152,11 +133,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         switch (requestCode){
             case MY_PERMISSION_REQUEST_COARSE_LOCATION: {
                 if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-                    Toast.makeText(this, "PERMISSION GRANTED", Toast.LENGTH_LONG).show();
+                    Log.v(LOG_TAG, "PERMISSION GRANTED");
                     mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                     new retrieveWeatherData().execute();
                 } else {
-                    Toast.makeText(this, "PERMISSION DENIED", Toast.LENGTH_LONG).show();
+                    Log.v(LOG_TAG, "PERMISSION DENIED");
                 }
             }
         }
@@ -172,9 +153,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if(mLastLocation!=null){
             new retrieveWeatherData().execute();
         }else if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)!=PackageManager.PERMISSION_GRANTED){
-            Toast.makeText(getApplicationContext(), "This app requires locations permissions", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.loc_perm_needed), Toast.LENGTH_LONG).show();
         }else
-            Toast.makeText(getApplicationContext(), "Have you enabled location?", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.enabled_location), Toast.LENGTH_LONG).show();
     }
 
 
@@ -190,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 @Override
                 public void onLocationChanged(Location location) {
                     mLastLocation = location;
-                    //new retrieveWeatherData().execute();
                 }
             });
         }
@@ -213,11 +193,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onDaySelected(int position) {
-        Toast.makeText(this, String.valueOf(position), Toast.LENGTH_SHORT).show();
 
         Bundle bundle = new Bundle();
         bundle.putInt("POSITION", position);
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager().findFragmentById(R.id.detail_fragment_land);
+
+        //Are we in two pane mode or does it need to start details activity
         if(detailFragment!=null && detailFragment.isVisible()){
             detailFragment.go(weatherData, position);
         }else {
@@ -225,14 +206,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             intent.putExtra("POSITION", position);
             startActivity(intent);
         }
-
-
-
-    }
-
-    void TaskHelper(WeatherListFragment f){
-        if(weatherData!=null)
-            f.onDataChanged(weatherData);
     }
 
     @Override
@@ -240,22 +213,41 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //Required by detail fragment but not needed here
     }
 
-    class retrieveWeatherData extends AsyncTask<Void, Void, WeatherData> {
+    @Override
+    public void refresh() {
+        new retrieveWeatherData().execute(true);
+    }
+
+    class retrieveWeatherData extends AsyncTask<Boolean, Void, WeatherData> {
+
+        boolean unableToRetrieve = false, dataUpdated = false;
 
         @Override
-        protected WeatherData doInBackground(Void... params) {
+        protected WeatherData doInBackground(Boolean... params) {
+
+            if(mDbHelper==null){
+                mDbHelper = new WeatherContract.WeatherDbHelper(getBaseContext());
+            }
+
+            Boolean bool;
+            if(params.length>0)
+                bool=params[0];
+            else
+                bool=false;
+
             SQLiteDatabase db = mDbHelper.getReadableDatabase();
             WeatherData data = getFromDb(db);
+            db.close();
 
-
-            if(data.list.size()==0 || HelperMethods.olderThanADay(data.list.get(0).dt)){
-                //TODO CALL API TO GET DATA
+            if(data.list.size()==0 || HelperMethods.olderThanTwoDays(data.list.get(0).dt) || bool){
                 weatherData = callApi();
                 if(weatherData!=null){
+                    dataUpdated = true;
                     writeToDB(weatherData);
                     return weatherData;
-                }else
-                    Log.e(LOG_TAG, "weather data is null after call to api");
+                }else{
+                    unableToRetrieve = true;
+                }
             }
             weatherData = data;
             return weatherData;
@@ -283,6 +275,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 values.put(WeatherContract.DayEntry.COLUMN_NAME_WIND_SPEED, day.windSpeed);
                 db.insert(WeatherContract.DayEntry.TABLE_NAME, null, values);
             }
+            db.close();
         }
 
         WeatherData callApi(){
@@ -293,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 }
                 URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?lat="+String.valueOf(mLastLocation.getLatitude())+
                         "&lon="+String.valueOf(mLastLocation.getLongitude())+"&appid="+BuildConfig.WEATHER_API_KEY+
-                        "&units=metric"+"&cnt="+10+"&mode=json");
+                        "&units=metric"+"&cnt="+16+"&mode=json");
 
                 HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
@@ -344,21 +337,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         @Override
         protected void onPostExecute(WeatherData s) {
-            if(s==null){
-                Toast.makeText(getApplicationContext(), R.string.retrieval_error, Toast.LENGTH_LONG).show();
+            WeatherListFragment fragment = (WeatherListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment4);
+            if(s==null || unableToRetrieve){
+                Toast.makeText(getApplicationContext(), R.string.unable_to_retrieve, Toast.LENGTH_LONG).show();
             } else {
                 //Sets the action bar to show the city and country detected
-
                 getSupportActionBar().setTitle(weatherData.cityName+", "+weatherData.country);
-                WeatherListFragment fragment = (WeatherListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment4);
                 DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager().findFragmentById(R.id.detail_fragment_land);
                 if(detailFragment!=null && detailFragment.isVisible())
                     detailFragment.go(weatherData, 0);
                 if(fragment!=null){
                     fragment.onDataChanged(s);
-                }
 
+                }
             }
+            if(dataUpdated)
+                Toast.makeText(MainActivity.this, getString(R.string.data_retrieved), Toast.LENGTH_SHORT).show();
+            if(fragment!=null)
+                fragment.swipeRefreshLayout.setRefreshing(false);
         }
     }
 
@@ -391,7 +387,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 sortOrder
         );
 
-        WeatherData data;
         List<DayData> list  = new ArrayList<DayData>();
         String country = "", city = "";
         while (cursor.moveToNext()){

@@ -54,7 +54,7 @@ public class WeatherAdapter extends ArrayAdapter<DayData>{
         holder.icon.setImageResource(IconFetcher.returnIconString(data.weatherIconId));
         holder.dayTemp.setText(HelperMethods.getTemp(getContext(), data.dayTemp));
         holder.nightTemp.setText(HelperMethods.getTemp(getContext(), data.nightTemp));
-        holder.day.setText(HelperMethods.getNameOfDayFromUnix(data.dt));
+        holder.day.setText(HelperMethods.getNameOfDayFromUnix(getContext(), data.dt));
         return row;
     }
 

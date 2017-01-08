@@ -53,7 +53,8 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             int index = listPreference.findIndexOfValue(value);
             if(index>=0){
                 preference.setSummary(listPreference.getEntries()[index]);
-            }
+            } else
+                preference.setSummary(((ListPreference) preference).getValue());
         }
         return true;
     }

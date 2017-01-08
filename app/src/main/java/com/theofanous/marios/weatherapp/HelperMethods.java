@@ -8,36 +8,31 @@ import android.preference.PreferenceManager;
 import java.util.Calendar;
 import java.util.Locale;
 
-/**
- * Created by Marios on 22/12/2016.
- */
 
 public class HelperMethods {
-    public static final String PREFERENCES_TEMP_KEY = "PREFERENCES_TEMP_KEY";
 
-
-    static boolean olderThanADay(long time){
+    static boolean olderThanTwoDays(long time){
         Calendar weatherTime = Calendar.getInstance();
         weatherTime.setTimeInMillis(time*1000);
         Calendar now = Calendar.getInstance();
 
-        if(now.get(Calendar.DATE)-weatherTime.get(Calendar.DATE)>=1)
+        if(now.get(Calendar.DATE)-weatherTime.get(Calendar.DATE)>=2)
             return true;
         return false;
     }
 
-    static String getNameOfDayFromUnix(long unixTime){
+    static String getNameOfDayFromUnix(Context context, long unixTime){
 
         Calendar weatherTime = Calendar.getInstance();
         weatherTime.setTimeInMillis(unixTime*1000);
         Calendar now = Calendar.getInstance();
 
         if(now.get(Calendar.DATE)==weatherTime.get(Calendar.DATE))
-            return "Today";
+            return context.getString(R.string.today);
         else if (now.get(Calendar.DATE)-weatherTime.get(Calendar.DATE)==1)
-            return "Yesterday";
+            return context.getString(R.string.yesterday);
         else if (now.get(Calendar.DATE)-weatherTime.get(Calendar.DATE)==-1)
-            return "Tomorrow";
+            return context.getString(R.string.tomorrow);
         else
             return weatherTime.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.UK);
     }

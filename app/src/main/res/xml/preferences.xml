@@ -4,7 +4,7 @@
     <ListPreference
         android:key="@string/pref_temp_key"
         android:title="@string/pref_temp_unit"
-        android:defaultValue="@string/pref_units_metric"
+        android:defaultValue="@string/pref_units_metric_key"
         android:entryValues="@array/pref_units_values"
         android:entries="@array/pref_units_entries"/>
 
