@@ -40,7 +40,7 @@ public class MainActivityTest {
     @Test
     public void aboutMenuClicked(){
         openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
-        onView(withText("AboutActivity"))
+        onView(withText("About"))
                 .perform(click());
         intended(hasComponent(AboutActivity.class.getName()));
     }

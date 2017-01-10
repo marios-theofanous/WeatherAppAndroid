@@ -26,7 +26,7 @@ public class HelperMethodsTest {
     }
 
     @Test
-    public void olderThanADay() throws Exception {
+    public void olderThanTwoDays() throws Exception {
 
         //Dividing by 1000 since olderThanTwoDays multiplies by 1000
         //Today
@@ -34,16 +34,14 @@ public class HelperMethodsTest {
                 HelperMethods.olderThanTwoDays(calendar.getTimeInMillis()/1000)
         );
 
-        //Minus a day and some seconds
-        calendar.setTimeInMillis(calendar.getTimeInMillis()-dayInMillis-10);
+        //Minus two days and some seconds
         assertTrue(
-                HelperMethods.olderThanTwoDays(calendar.getTimeInMillis()/1000)
+                HelperMethods.olderThanTwoDays((calendar.getTimeInMillis()-dayInMillis*2-10)/1000)
         );
 
         //Tomorrow
-        calendar.setTimeInMillis(calendar.getTimeInMillis()+dayInMillis+10);
         assertFalse(
-                HelperMethods.olderThanTwoDays(calendar.getTimeInMillis()/1000)
+                HelperMethods.olderThanTwoDays((calendar.getTimeInMillis()+dayInMillis+10)/1000)
         );
     }
 
